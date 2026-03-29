@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from '@tanstack/react-router'
 import { getLenderDataFn, disburseLoanFn } from '@/server/functions/groupflux'
 import { TrustScoreBadge } from './TrustBadge'
+import { formatCurrency } from '@/lib/utils'
 import type { Groups, Farmers } from '@/server/lib/appwrite.types'
 
 type EnrichedGroup = Groups & {
@@ -193,8 +194,7 @@ function GroupCard({
           />
         </div>
         <div className="repayment-bar-sub">
-          KES {group.repaid.toLocaleString()} /{' '}
-          {group.disbursed.toLocaleString()}
+          {formatCurrency(group.repaid)} / {formatCurrency(group.disbursed)}
         </div>
       </div>
       <button className="btn-disburse" onClick={onDisburse}>
@@ -276,7 +276,7 @@ export function LenderDashboard() {
       <section className="stats-bar">
         <StatCard
           label="Total Disbursed"
-          value={`KES ${(data.stats.totalDisbursed / 1000).toFixed(0)}K`}
+          value={formatCurrency(data.stats.totalDisbursed)}
           sub="Across all groups"
         />
         <StatCard

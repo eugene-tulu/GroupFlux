@@ -16,6 +16,7 @@ import {
   getInvestorDataFn,
   recordInvestmentFn,
 } from '@/server/functions/groupflux'
+import { formatCurrency } from '@/lib/utils'
 import type { Groups } from '@/server/lib/appwrite.types'
 
 const TIERS = [
@@ -145,7 +146,7 @@ function InvestModal({
                 />
               </label>
               <label>
-                Investment Amount (KES, min {tier.minInvest.toLocaleString()})
+                Investment Amount (min {formatCurrency(tier.minInvest)})
                 <input
                   type="number"
                   value={amount}
@@ -236,7 +237,7 @@ export function InvestorDashboard() {
         >
           <p className="stat-label">Capital Deployed</p>
           <p className="stat-value">
-            KES {(stats.totalCapital / 1000).toFixed(0)}K
+            {formatCurrency(stats.totalCapital)}
           </p>
           <p className="stat-sub">Total invested</p>
         </motion.div>
@@ -272,7 +273,7 @@ export function InvestorDashboard() {
               <p className="tier-yield">{tier.yieldRange}</p>
               <p className="tier-yield-label">projected annual yield</p>
               <p className="tier-min">
-                Min. KES {tier.minInvest.toLocaleString()}
+                Min. {formatCurrency(tier.minInvest)}
               </p>
               <p className="tier-groups">{tier.groups}</p>
               {tier.extra && <p className="tier-extra">📋 {tier.extra}</p>}
@@ -399,8 +400,8 @@ export function InvestorDashboard() {
                         {g.repaymentRate ?? 0}%
                       </span>
                     </td>
-                    <td>KES {deployed.toLocaleString()}</td>
-                    <td>KES {expectedReturn.toLocaleString()}</td>
+                    <td>{formatCurrency(deployed)}</td>
+                    <td>{formatCurrency(expectedReturn)}</td>
                     <td>
                       <span
                         className={`status-badge ${g.status === 'active' ? 'badge-green' : g.status === 'review' ? 'badge-amber' : 'badge-red'}`}
