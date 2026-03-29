@@ -1,0 +1,1381 @@
+{
+  "projectId": "69c92ba50005516d0547",
+  "settings": {
+    "services": {
+      "account": true,
+      "avatars": true,
+      "databases": true,
+      "locale": true,
+      "health": true,
+      "storage": true,
+      "teams": true,
+      "users": true,
+      "sites": true,
+      "functions": true,
+      "graphql": true,
+      "messaging": true
+    },
+    "auth": {
+      "methods": {
+        "jwt": true,
+        "phone": true,
+        "invites": true,
+        "anonymous": true,
+        "email-otp": true,
+        "magic-url": true,
+        "email-password": true
+      },
+      "security": {
+        "duration": 31536000,
+        "limit": 0,
+        "sessionsLimit": 10,
+        "passwordHistory": 0,
+        "passwordDictionary": false,
+        "personalDataCheck": false,
+        "sessionAlerts": false,
+        "mockNumbers": []
+      }
+    }
+  },
+  "projectName": "GroupFlux",
+  "functions": [],
+  "sites": [],
+  "databases": [
+    {
+      "$id": "imagine-project-db",
+      "name": "imagine-project-db",
+      "$createdAt": "2026-03-29T13:41:34.441+00:00",
+      "$updatedAt": "2026-03-29T13:41:35.279+00:00",
+      "enabled": true,
+      "type": "legacy",
+      "policies": [],
+      "archives": []
+    }
+  ],
+  "tables": [
+    {
+      "$id": "farmers",
+      "$permissions": [],
+      "databaseId": "imagine-project-db",
+      "name": "farmers",
+      "enabled": true,
+      "rowSecurity": true,
+      "columns": [
+        {
+          "key": "createdBy",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "name",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "size": 255,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "phone",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "size": 20,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "mpesaNumber",
+          "type": "string",
+          "required": false,
+          "array": false,
+          "size": 20,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "groupId",
+          "type": "string",
+          "required": false,
+          "array": false,
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "role",
+          "type": "string",
+          "required": false,
+          "array": false,
+          "size": 20,
+          "default": "member",
+          "encrypt": false
+        },
+        {
+          "key": "trustScore",
+          "type": "integer",
+          "required": false,
+          "array": false,
+          "default": 0,
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "seasonsActive",
+          "type": "integer",
+          "required": false,
+          "array": false,
+          "default": 0,
+          "min": null,
+          "max": null
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_createdBy",
+          "type": "key",
+          "status": "available",
+          "columns": ["createdBy"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_groupId",
+          "type": "key",
+          "status": "available",
+          "columns": ["groupId"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_phone",
+          "type": "key",
+          "status": "available",
+          "columns": ["phone"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_mpesaNumber",
+          "type": "key",
+          "status": "available",
+          "columns": ["mpesaNumber"],
+          "orders": ["ASC"]
+        }
+      ]
+    },
+    {
+      "$id": "groups",
+      "$permissions": [],
+      "databaseId": "imagine-project-db",
+      "name": "groups",
+      "enabled": true,
+      "rowSecurity": true,
+      "columns": [
+        {
+          "key": "createdBy",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "name",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "size": 255,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "region",
+          "type": "string",
+          "required": false,
+          "array": false,
+          "size": 128,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "crop",
+          "type": "string",
+          "required": false,
+          "array": false,
+          "size": 128,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "leaderId",
+          "type": "string",
+          "required": false,
+          "array": false,
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "status",
+          "type": "string",
+          "required": false,
+          "array": false,
+          "size": 20,
+          "default": "active",
+          "encrypt": false
+        },
+        {
+          "key": "repaymentRate",
+          "type": "double",
+          "required": false,
+          "array": false,
+          "default": 0,
+          "min": null,
+          "max": null
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_createdBy",
+          "type": "key",
+          "status": "available",
+          "columns": ["createdBy"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_leaderId",
+          "type": "key",
+          "status": "available",
+          "columns": ["leaderId"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_status",
+          "type": "key",
+          "status": "available",
+          "columns": ["status"],
+          "orders": ["ASC"]
+        }
+      ]
+    },
+    {
+      "$id": "transactions",
+      "$permissions": [],
+      "databaseId": "imagine-project-db",
+      "name": "transactions",
+      "enabled": true,
+      "rowSecurity": true,
+      "columns": [
+        {
+          "key": "createdBy",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "farmerId",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "loanId",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "mpesaReceiptNumber",
+          "type": "string",
+          "required": false,
+          "array": false,
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "amount",
+          "type": "double",
+          "required": true,
+          "array": false,
+          "default": null,
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "type",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "size": 20,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "timestamp",
+          "type": "datetime",
+          "required": false,
+          "array": false,
+          "default": null,
+          "format": ""
+        },
+        {
+          "key": "callbackPayload",
+          "type": "string",
+          "required": false,
+          "array": false,
+          "size": 2000,
+          "default": null,
+          "encrypt": false
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_createdBy",
+          "type": "key",
+          "status": "available",
+          "columns": ["createdBy"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_farmerId",
+          "type": "key",
+          "status": "available",
+          "columns": ["farmerId"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_loanId",
+          "type": "key",
+          "status": "available",
+          "columns": ["loanId"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_type",
+          "type": "key",
+          "status": "available",
+          "columns": ["type"],
+          "orders": ["ASC"]
+        }
+      ]
+    },
+    {
+      "$id": "loans",
+      "$permissions": [],
+      "databaseId": "imagine-project-db",
+      "name": "loans",
+      "enabled": true,
+      "rowSecurity": true,
+      "columns": [
+        {
+          "key": "createdBy",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "farmerId",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "groupId",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "amount",
+          "type": "double",
+          "required": true,
+          "array": false,
+          "default": null,
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "season",
+          "type": "string",
+          "required": false,
+          "array": false,
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "disbursedAt",
+          "type": "datetime",
+          "required": false,
+          "array": false,
+          "default": null,
+          "format": ""
+        },
+        {
+          "key": "dueDate",
+          "type": "datetime",
+          "required": false,
+          "array": false,
+          "default": null,
+          "format": ""
+        },
+        {
+          "key": "status",
+          "type": "string",
+          "required": false,
+          "array": false,
+          "size": 20,
+          "default": "pending",
+          "encrypt": false
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_createdBy",
+          "type": "key",
+          "status": "available",
+          "columns": ["createdBy"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_farmerId",
+          "type": "key",
+          "status": "available",
+          "columns": ["farmerId"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_groupId",
+          "type": "key",
+          "status": "available",
+          "columns": ["groupId"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_status",
+          "type": "key",
+          "status": "available",
+          "columns": ["status"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_season",
+          "type": "key",
+          "status": "available",
+          "columns": ["season"],
+          "orders": ["ASC"]
+        }
+      ]
+    },
+    {
+      "$id": "investors",
+      "$permissions": [],
+      "databaseId": "imagine-project-db",
+      "name": "investors",
+      "enabled": true,
+      "rowSecurity": true,
+      "columns": [
+        {
+          "key": "createdBy",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "name",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "size": 255,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "email",
+          "type": "string",
+          "required": true,
+          "array": false,
+          "default": null,
+          "format": "email"
+        },
+        {
+          "key": "type",
+          "type": "string",
+          "required": false,
+          "array": false,
+          "size": 20,
+          "default": "retail",
+          "encrypt": false
+        },
+        {
+          "key": "capitalDeployed",
+          "type": "double",
+          "required": false,
+          "array": false,
+          "default": 0,
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "targetYield",
+          "type": "double",
+          "required": false,
+          "array": false,
+          "default": 0,
+          "min": null,
+          "max": null
+        },
+        {
+          "key": "groupIds",
+          "type": "string",
+          "required": false,
+          "array": true,
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_createdBy",
+          "type": "key",
+          "status": "available",
+          "columns": ["createdBy"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_email",
+          "type": "key",
+          "status": "available",
+          "columns": ["email"],
+          "orders": ["ASC"]
+        },
+        {
+          "key": "idx_type",
+          "type": "key",
+          "status": "available",
+          "columns": ["type"],
+          "orders": ["ASC"]
+        }
+      ]
+    }
+  ],
+  "collections": [
+    {
+      "$id": "farmers",
+      "$permissions": [],
+      "databaseId": "imagine-project-db",
+      "name": "farmers",
+      "enabled": true,
+      "documentSecurity": true,
+      "attributes": [
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.918+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.918+00:00",
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "name",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.918+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.918+00:00",
+          "size": 255,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "phone",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.918+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.918+00:00",
+          "size": 20,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "mpesaNumber",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.918+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.918+00:00",
+          "size": 20,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "groupId",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.918+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.918+00:00",
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "role",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.918+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.918+00:00",
+          "size": 20,
+          "default": "member",
+          "encrypt": false
+        },
+        {
+          "key": "trustScore",
+          "type": "integer",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.918+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.918+00:00",
+          "min": null,
+          "max": null,
+          "default": 0
+        },
+        {
+          "key": "seasonsActive",
+          "type": "integer",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.918+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.918+00:00",
+          "min": null,
+          "max": null,
+          "default": 0
+        }
+      ],
+      "indexes": [
+        {
+          "$id": "123577_1_idx_createdBy",
+          "$createdAt": "2026-03-29T13:41:35.948+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.948+00:00",
+          "key": "idx_createdBy",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["createdBy"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        },
+        {
+          "$id": "123577_1_idx_groupId",
+          "$createdAt": "2026-03-29T13:41:35.948+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.948+00:00",
+          "key": "idx_groupId",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["groupId"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        },
+        {
+          "$id": "123577_1_idx_phone",
+          "$createdAt": "2026-03-29T13:41:35.948+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.948+00:00",
+          "key": "idx_phone",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["phone"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        },
+        {
+          "$id": "123577_1_idx_mpesaNumber",
+          "$createdAt": "2026-03-29T13:41:35.948+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.948+00:00",
+          "key": "idx_mpesaNumber",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["mpesaNumber"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        }
+      ],
+      "bytesMax": 65535,
+      "bytesUsed": 2853
+    },
+    {
+      "$id": "groups",
+      "$permissions": [],
+      "databaseId": "imagine-project-db",
+      "name": "groups",
+      "enabled": true,
+      "documentSecurity": true,
+      "attributes": [
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.894+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.894+00:00",
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "name",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.894+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.894+00:00",
+          "size": 255,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "region",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.894+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.894+00:00",
+          "size": 128,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "crop",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.894+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.894+00:00",
+          "size": 128,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "leaderId",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.894+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.894+00:00",
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "status",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.894+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.894+00:00",
+          "size": 20,
+          "default": "active",
+          "encrypt": false
+        },
+        {
+          "key": "repaymentRate",
+          "type": "double",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.894+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.894+00:00",
+          "min": null,
+          "max": null,
+          "default": 0
+        }
+      ],
+      "indexes": [
+        {
+          "$id": "123577_2_idx_createdBy",
+          "$createdAt": "2026-03-29T13:41:35.930+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.930+00:00",
+          "key": "idx_createdBy",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["createdBy"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        },
+        {
+          "$id": "123577_2_idx_leaderId",
+          "$createdAt": "2026-03-29T13:41:35.930+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.930+00:00",
+          "key": "idx_leaderId",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["leaderId"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        },
+        {
+          "$id": "123577_2_idx_status",
+          "$createdAt": "2026-03-29T13:41:35.930+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.930+00:00",
+          "key": "idx_status",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["status"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        }
+      ],
+      "bytesMax": 65535,
+      "bytesUsed": 3717
+    },
+    {
+      "$id": "transactions",
+      "$permissions": [],
+      "databaseId": "imagine-project-db",
+      "name": "transactions",
+      "enabled": true,
+      "documentSecurity": true,
+      "attributes": [
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.944+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.944+00:00",
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "farmerId",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.944+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.944+00:00",
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "loanId",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.944+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.944+00:00",
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "mpesaReceiptNumber",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.944+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.944+00:00",
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "amount",
+          "type": "double",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.944+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.944+00:00",
+          "min": null,
+          "max": null,
+          "default": null
+        },
+        {
+          "key": "type",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.944+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.944+00:00",
+          "size": 20,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "timestamp",
+          "type": "datetime",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.944+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.944+00:00",
+          "format": "",
+          "default": null
+        },
+        {
+          "key": "callbackPayload",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.944+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.944+00:00",
+          "size": 2000,
+          "default": null,
+          "encrypt": false
+        }
+      ],
+      "indexes": [
+        {
+          "$id": "123577_3_idx_createdBy",
+          "$createdAt": "2026-03-29T13:41:35.990+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.990+00:00",
+          "key": "idx_createdBy",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["createdBy"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        },
+        {
+          "$id": "123577_3_idx_farmerId",
+          "$createdAt": "2026-03-29T13:41:35.990+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.990+00:00",
+          "key": "idx_farmerId",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["farmerId"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        },
+        {
+          "$id": "123577_3_idx_loanId",
+          "$createdAt": "2026-03-29T13:41:35.990+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.990+00:00",
+          "key": "idx_loanId",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["loanId"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        },
+        {
+          "$id": "123577_3_idx_type",
+          "$createdAt": "2026-03-29T13:41:35.990+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.990+00:00",
+          "key": "idx_type",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["type"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        }
+      ],
+      "bytesMax": 65535,
+      "bytesUsed": 10193
+    },
+    {
+      "$id": "loans",
+      "$permissions": [],
+      "databaseId": "imagine-project-db",
+      "name": "loans",
+      "enabled": true,
+      "documentSecurity": true,
+      "attributes": [
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.941+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.941+00:00",
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "farmerId",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.941+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.941+00:00",
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "groupId",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.941+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.941+00:00",
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "amount",
+          "type": "double",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.941+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.941+00:00",
+          "min": null,
+          "max": null,
+          "default": null
+        },
+        {
+          "key": "season",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.941+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.941+00:00",
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "disbursedAt",
+          "type": "datetime",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.941+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.941+00:00",
+          "format": "",
+          "default": null
+        },
+        {
+          "key": "dueDate",
+          "type": "datetime",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.941+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.941+00:00",
+          "format": "",
+          "default": null
+        },
+        {
+          "key": "status",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:35.941+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.941+00:00",
+          "size": 20,
+          "default": "pending",
+          "encrypt": false
+        }
+      ],
+      "indexes": [
+        {
+          "$id": "123577_4_idx_createdBy",
+          "$createdAt": "2026-03-29T13:41:35.990+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.990+00:00",
+          "key": "idx_createdBy",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["createdBy"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        },
+        {
+          "$id": "123577_4_idx_farmerId",
+          "$createdAt": "2026-03-29T13:41:35.990+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.990+00:00",
+          "key": "idx_farmerId",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["farmerId"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        },
+        {
+          "$id": "123577_4_idx_groupId",
+          "$createdAt": "2026-03-29T13:41:35.990+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.990+00:00",
+          "key": "idx_groupId",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["groupId"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        },
+        {
+          "$id": "123577_4_idx_status",
+          "$createdAt": "2026-03-29T13:41:35.990+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.990+00:00",
+          "key": "idx_status",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["status"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        },
+        {
+          "$id": "123577_4_idx_season",
+          "$createdAt": "2026-03-29T13:41:35.990+00:00",
+          "$updatedAt": "2026-03-29T13:41:35.990+00:00",
+          "key": "idx_season",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["season"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        }
+      ],
+      "bytesMax": 65535,
+      "bytesUsed": 2198
+    },
+    {
+      "$id": "investors",
+      "$permissions": [],
+      "databaseId": "imagine-project-db",
+      "name": "investors",
+      "enabled": true,
+      "documentSecurity": true,
+      "attributes": [
+        {
+          "key": "createdBy",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:36.002+00:00",
+          "$updatedAt": "2026-03-29T13:41:36.002+00:00",
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "name",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:36.002+00:00",
+          "$updatedAt": "2026-03-29T13:41:36.002+00:00",
+          "size": 255,
+          "default": null,
+          "encrypt": false
+        },
+        {
+          "key": "email",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": true,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:36.002+00:00",
+          "$updatedAt": "2026-03-29T13:41:36.002+00:00",
+          "format": "email",
+          "default": null
+        },
+        {
+          "key": "type",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:36.002+00:00",
+          "$updatedAt": "2026-03-29T13:41:36.002+00:00",
+          "size": 20,
+          "default": "retail",
+          "encrypt": false
+        },
+        {
+          "key": "capitalDeployed",
+          "type": "double",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:36.002+00:00",
+          "$updatedAt": "2026-03-29T13:41:36.002+00:00",
+          "min": null,
+          "max": null,
+          "default": 0
+        },
+        {
+          "key": "targetYield",
+          "type": "double",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": false,
+          "$createdAt": "2026-03-29T13:41:36.002+00:00",
+          "$updatedAt": "2026-03-29T13:41:36.002+00:00",
+          "min": null,
+          "max": null,
+          "default": 0
+        },
+        {
+          "key": "groupIds",
+          "type": "string",
+          "status": "available",
+          "error": "",
+          "required": false,
+          "array": true,
+          "$createdAt": "2026-03-29T13:41:36.002+00:00",
+          "$updatedAt": "2026-03-29T13:41:36.002+00:00",
+          "size": 64,
+          "default": null,
+          "encrypt": false
+        }
+      ],
+      "indexes": [
+        {
+          "$id": "123577_5_idx_createdBy",
+          "$createdAt": "2026-03-29T13:41:36.043+00:00",
+          "$updatedAt": "2026-03-29T13:41:36.043+00:00",
+          "key": "idx_createdBy",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["createdBy"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        },
+        {
+          "$id": "123577_5_idx_email",
+          "$createdAt": "2026-03-29T13:41:36.043+00:00",
+          "$updatedAt": "2026-03-29T13:41:36.043+00:00",
+          "key": "idx_email",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["email"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        },
+        {
+          "$id": "123577_5_idx_type",
+          "$createdAt": "2026-03-29T13:41:36.043+00:00",
+          "$updatedAt": "2026-03-29T13:41:36.043+00:00",
+          "key": "idx_type",
+          "type": "key",
+          "status": "available",
+          "error": "",
+          "attributes": ["type"],
+          "lengths": [0],
+          "orders": ["ASC"]
+        }
+      ],
+      "bytesMax": 65535,
+      "bytesUsed": 3483
+    }
+  ],
+  "buckets": [],
+  "teams": [],
+  "topics": []
+}
