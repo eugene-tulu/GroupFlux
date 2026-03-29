@@ -1,5 +1,10 @@
 {
   "version": 2,
+  "build": {
+    "env": {
+      "FOR_SITES": "true"
+    }
+  },
   "builds": [
     {
       "src": "package.json",
