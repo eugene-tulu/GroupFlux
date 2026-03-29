@@ -696,7 +696,7 @@ export const seedDemoDataFn = createServerFn({ method: 'POST' }).handler(
           1,
         ).toISOString(),
         status:
-          farmer.trustScore >= 80
+          (farmer.trustScore ?? 0) >= 80
             ? 'repaid'
             : i < (farmer.seasonsActive ?? 1) - 1
               ? 'repaid'

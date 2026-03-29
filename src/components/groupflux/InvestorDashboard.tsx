@@ -333,7 +333,7 @@ export function InvestorDashboard() {
                   tickFormatter={(v) => `${v}%`}
                 />
                 <Tooltip
-                  formatter={(value: number) => [`${value}%`, 'Repayment Rate']}
+                  formatter={(value: any, _name: any) => [`${value ?? 0}%`, 'Repayment Rate']}
                   contentStyle={{
                     borderRadius: 8,
                     border: '1px solid #E5E7EB',

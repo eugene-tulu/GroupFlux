@@ -6,7 +6,7 @@ import {
   getFarmerProfileFn,
   recordRepaymentFn,
 } from '@/server/functions/groupflux'
-import { TrustScoreBadge, GroupFluxVerifiedBadge } from './TrustBadge'
+import { GroupFluxVerifiedBadge } from './TrustBadge'
 import type { Loans } from '@/server/lib/appwrite.types'
 
 function LoanStatusPill({ status }: { status: string }) {
@@ -128,7 +128,6 @@ function RepaymentPanel({
 
 export function FarmerProfile({ farmerId }: { farmerId: string }) {
   const [refreshKey, setRefreshKey] = useState(0)
-  const qc = useQueryClient()
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['farmer', farmerId, refreshKey],

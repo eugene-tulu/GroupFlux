@@ -144,9 +144,7 @@ export type ExtractQueryValue<T> = T extends (infer U)[]
     ? NonNullable<T>
     : never
 
-export type QueryableKeys<T> = {
-  [K in keyof T]: ExtractQueryValue<T[K]> extends never ? never : K
-}[keyof T]
+export type QueryableKeys<T> = keyof T
 
 export type QueryBuilder<T> = {
   equal: <K extends QueryableKeys<T>>(

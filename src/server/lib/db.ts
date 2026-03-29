@@ -15,47 +15,35 @@ import type {
   DatabaseTableMap,
   DatabaseTables,
   QueryBuilder,
-  QueryValue,
   PermissionBuilder,
   RoleBuilder,
   RoleString,
-} from './types.js'
+} from './appwrite.types'
 import { PROJECT_ID, ENDPOINT, API_KEY } from './constants.js'
 
-const createQueryBuilder = <T>(): QueryBuilder<T> => ({
-  equal: (field, value) => Query.equal(String(field), value as QueryValue),
-  notEqual: (field, value) =>
-    Query.notEqual(String(field), value as QueryValue),
-  lessThan: (field, value) =>
-    Query.lessThan(String(field), value as QueryValue),
-  lessThanEqual: (field, value) =>
-    Query.lessThanEqual(String(field), value as QueryValue),
-  greaterThan: (field, value) =>
-    Query.greaterThan(String(field), value as QueryValue),
-  greaterThanEqual: (field, value) =>
-    Query.greaterThanEqual(String(field), value as QueryValue),
-  contains: (field, value) =>
-    Query.contains(String(field), value as string | QueryValue[]),
-  search: (field, value) => Query.search(String(field), value),
-  isNull: (field) => Query.isNull(String(field)),
-  isNotNull: (field) => Query.isNotNull(String(field)),
-  startsWith: (field, value) => Query.startsWith(String(field), value),
-  endsWith: (field, value) => Query.endsWith(String(field), value),
-  between: (field, start, end) =>
-    Query.between(
-      String(field),
-      start as string | number,
-      end as string | number,
-    ),
-  select: (fields) => Query.select(fields.map(String)),
-  orderAsc: (field) => Query.orderAsc(String(field)),
-  orderDesc: (field) => Query.orderDesc(String(field)),
-  limit: (value) => Query.limit(value),
-  offset: (value) => Query.offset(value),
-  cursorAfter: (documentId) => Query.cursorAfter(documentId),
-  cursorBefore: (documentId) => Query.cursorBefore(documentId),
-  or: (...queries) => Query.or(queries),
-  and: (...queries) => Query.and(queries),
+const createQueryBuilder = (): any => ({
+  equal: (field: any, value: any) => Query.equal(String(field), value),
+  notEqual: (field: any, value: any) => Query.notEqual(String(field), value),
+  lessThan: (field: any, value: any) => Query.lessThan(String(field), value),
+  lessThanEqual: (field: any, value: any) => Query.lessThanEqual(String(field), value),
+  greaterThan: (field: any, value: any) => Query.greaterThan(String(field), value),
+  greaterThanEqual: (field: any, value: any) => Query.greaterThanEqual(String(field), value),
+  contains: (field: any, value: any) => Query.contains(String(field), value),
+  search: (field: any, value: any) => Query.search(String(field), value),
+  isNull: (field: any) => Query.isNull(String(field)),
+  isNotNull: (field: any) => Query.isNotNull(String(field)),
+  startsWith: (field: any, value: any) => Query.startsWith(String(field), value),
+  endsWith: (field: any, value: any) => Query.endsWith(String(field), value),
+  between: (field: any, start: any, end: any) => Query.between(String(field), start, end),
+  select: (fields: any) => Query.select(fields),
+  orderAsc: (field: any) => Query.orderAsc(String(field)),
+  orderDesc: (field: any) => Query.orderDesc(String(field)),
+  limit: (value: any) => Query.limit(value),
+  offset: (value: any) => Query.offset(value),
+  cursorAfter: (documentId: any) => Query.cursorAfter(documentId),
+  cursorBefore: (documentId: any) => Query.cursorBefore(documentId),
+  or: (...queries: any[]) => Query.or(queries),
+  and: (...queries: any[]) => Query.and(queries),
 })
 
 const tableIdMap: Record<string, Record<string, string>> = Object.create(null)
@@ -70,20 +58,20 @@ const tablesWithRelationships = new Set<string>()
 
 const roleBuilder: RoleBuilder = {
   any: () => Role.any() as RoleString,
-  user: (userId, status?) => Role.user(userId, status) as RoleString,
-  users: (status?) => Role.users(status) as RoleString,
+  user: (userId: string, status?: string) => Role.user(userId, status) as RoleString,
+  users: (status?: string) => Role.users(status) as RoleString,
   guests: () => Role.guests() as RoleString,
-  team: (teamId, role?) => Role.team(teamId, role) as RoleString,
-  member: (memberId) => Role.member(memberId) as RoleString,
-  label: (label) => Role.label(label) as RoleString,
+  team: (teamId: string, role?: string) => Role.team(teamId, role) as RoleString,
+  member: (memberId: string) => Role.member(memberId) as RoleString,
+  label: (label: string) => Role.label(label) as RoleString,
 }
 
 const permissionBuilder: PermissionBuilder = {
-  read: (role) => Permission.read(role),
-  write: (role) => Permission.write(role),
-  create: (role) => Permission.create(role),
-  update: (role) => Permission.update(role),
-  delete: (role) => Permission.delete(role),
+  read: (role: RoleString) => Permission.read(role),
+  write: (role: RoleString) => Permission.write(role),
+  create: (role: RoleString) => Permission.create(role),
+  update: (role: RoleString) => Permission.update(role),
+  delete: (role: RoleString) => Permission.delete(role),
 }
 
 const resolvePermissions = (
@@ -203,7 +191,7 @@ function createTableApi<T extends Models.Row>(
       tablesDB.listRows<T>({
         databaseId,
         tableId,
-        queries: options?.queries?.(createQueryBuilder<T>()),
+        queries: options?.queries?.(createQueryBuilder()),
       }),
     createMany: (rows: object[], options?: { transactionId?: string }) =>
       tablesDB.createRows({
@@ -223,7 +211,7 @@ function createTableApi<T extends Models.Row>(
         databaseId,
         tableId,
         data,
-        queries: options?.queries?.(createQueryBuilder<T>()),
+        queries: options?.queries?.(createQueryBuilder()),
         transactionId: options?.transactionId,
       }),
     deleteMany: (options?: {
@@ -233,7 +221,7 @@ function createTableApi<T extends Models.Row>(
       tablesDB.deleteRows({
         databaseId,
         tableId,
-        queries: options?.queries?.(createQueryBuilder<T>()),
+        queries: options?.queries?.(createQueryBuilder()),
         transactionId: options?.transactionId,
       }),
   }
@@ -346,14 +334,17 @@ function createDatabaseHandle<D extends DatabaseId>(
         )
       }
       const resolvedTableId = dbMap[tableId]
-      return tablesDB.updateTable({
+      const updateOpts: any = {
         databaseId,
         tableId: resolvedTableId,
-        name: options?.name,
         permissions: resolvePermissions(options?.permissions),
         rowSecurity: options?.rowSecurity,
         enabled: options?.enabled,
-      })
+      }
+      if (options?.name !== undefined) {
+        updateOpts.name = options.name
+      }
+      return tablesDB.updateTable(updateOpts)
     },
     delete: async (tableId: string) => {
       if (!hasOwn(dbMap, tableId)) {
