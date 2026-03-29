@@ -16,11 +16,10 @@ const config = defineConfig({
     }),
     tailwindcss(),
     tanstackStart(),
-    forSites &&
-      nitroV2Plugin({
-        compatibilityDate: '2025-10-08',
-        preset: 'node',
-      }),
+    nitroV2Plugin({
+      compatibilityDate: '2025-10-08',
+      preset: forSites ? 'vercel' : 'node',
+    }),
     devtoolsJson(),
     viteReact(),
   ],
