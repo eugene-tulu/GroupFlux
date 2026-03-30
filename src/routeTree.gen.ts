@@ -23,6 +23,7 @@ import { Route as AuthSignInRouteImport } from './routes/_auth/sign-in'
 import { Route as AuthResetPasswordRouteImport } from './routes/_auth/reset-password'
 import { Route as AuthForgotPasswordRouteImport } from './routes/_auth/forgot-password'
 import { Route as ApiOgRouteImport } from './routes/_api/og'
+import { Route as ApiMpesaCallbackRouteImport } from './routes/_api/mpesa-callback'
 import { Route as ApiHelloRouteImport } from './routes/_api/hello'
 import { Route as PublicFarmerFarmerIdRouteImport } from './routes/_public/farmer.$farmerId'
 
@@ -94,6 +95,11 @@ const ApiOgRoute = ApiOgRouteImport.update({
   path: '/og',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMpesaCallbackRoute = ApiMpesaCallbackRouteImport.update({
+  id: '/_api/mpesa-callback',
+  path: '/mpesa-callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiHelloRoute = ApiHelloRouteImport.update({
   id: '/_api/hello',
   path: '/hello',
@@ -107,6 +113,7 @@ const PublicFarmerFarmerIdRoute = PublicFarmerFarmerIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/hello': typeof ApiHelloRoute
+  '/mpesa-callback': typeof ApiMpesaCallbackRoute
   '/og': typeof ApiOgRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
   '/reset-password': typeof AuthResetPasswordRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/hello': typeof ApiHelloRoute
+  '/mpesa-callback': typeof ApiMpesaCallbackRoute
   '/og': typeof ApiOgRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
   '/reset-password': typeof AuthResetPasswordRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/_protected': typeof ProtectedRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/_api/hello': typeof ApiHelloRoute
+  '/_api/mpesa-callback': typeof ApiMpesaCallbackRoute
   '/_api/og': typeof ApiOgRoute
   '/_auth/forgot-password': typeof AuthForgotPasswordRoute
   '/_auth/reset-password': typeof AuthResetPasswordRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/hello'
+    | '/mpesa-callback'
     | '/og'
     | '/forgot-password'
     | '/reset-password'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/hello'
+    | '/mpesa-callback'
     | '/og'
     | '/forgot-password'
     | '/reset-password'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/_protected'
     | '/_public'
     | '/_api/hello'
+    | '/_api/mpesa-callback'
     | '/_api/og'
     | '/_auth/forgot-password'
     | '/_auth/reset-password'
@@ -210,6 +222,7 @@ export interface RootRouteChildren {
   ProtectedRoute: typeof ProtectedRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   ApiHelloRoute: typeof ApiHelloRoute
+  ApiMpesaCallbackRoute: typeof ApiMpesaCallbackRoute
   ApiOgRoute: typeof ApiOgRoute
 }
 
@@ -313,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOgRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_api/mpesa-callback': {
+      id: '/_api/mpesa-callback'
+      path: '/mpesa-callback'
+      fullPath: '/mpesa-callback'
+      preLoaderRoute: typeof ApiMpesaCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_api/hello': {
       id: '/_api/hello'
       path: '/hello'
@@ -384,6 +404,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProtectedRoute: ProtectedRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   ApiHelloRoute: ApiHelloRoute,
+  ApiMpesaCallbackRoute: ApiMpesaCallbackRoute,
   ApiOgRoute: ApiOgRoute,
 }
 export const routeTree = rootRouteImport

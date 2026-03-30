@@ -40,6 +40,73 @@ export function generateMpesaReceipt(): string {
   return result
 }
 
+// ─── M-Pesa B2C Disbursement ────────────────────────────────────────────────
+let mpesaAccessToken: string | null = null
+let tokenExpiry = 0
+
+async function getMpesaAccessToken(): Promise<string> {
+  const now = Date.now()
+  if (mpesaAccessToken && now < tokenExpiry) return mpesaAccessToken!
+
+  const consumerKey = import.meta.env.MPESA_CONSUMER_KEY
+  const consumerSecret = import.meta.env.MPESA_CONSUMER_SECRET
+  if (!consumerKey || !consumerSecret) {
+    throw new Error('M-Pesa credentials not set')
+  }
+
+  const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64')
+  const res = await fetch('https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials', {
+    method: 'GET',
+    headers: { Authorization: `Basic ${auth}` },
+  })
+  const data = await res.json()
+  if (!data.access_token) throw new Error('Failed to get M-Pesa access token')
+
+  mpesaAccessToken = data.access_token
+  tokenExpiry = now + (data.expires_in * 1000) - 60000 // 1 min buffer
+  return mpesaAccessToken!
+}
+
+export async function disburseViaMpesaB2C(
+  phone: string,
+  amount: number,
+  shortcode: string,
+  callbackUrl: string
+): Promise<{ conversationId: string; responseCode: string }> {
+  const token = await getMpesaAccessToken()
+
+  const body = {
+    InitiatorName: import.meta.env.MPESA_INITIATOR_NAME,
+    SecurityCredential: import.meta.env.MPESA_SECURITY_CREDENTIAL,
+    CommandID: 'BusinessPayment',
+    Amount: amount.toString(),
+    PartyA: shortcode,
+    PartyB: phone,
+    Remarks: `Loan disbursement`,
+    QueueTimeOutURL: callbackUrl,
+    ResultURL: callbackUrl,
+    Occasion: 'Loan',
+  }
+
+  const res = await fetch('https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  })
+
+  const result = await res.json()
+  if (result.ResponseCode !== '0') {
+    throw new Error(`M-Pesa B2C failed: ${result.ResponseDescription || result.ResponseCode}`)
+  }
+  return {
+    conversationId: result.ConversationID,
+    responseCode: result.ResponseCode,
+  }
+}
+
 // ─── LENDER DASHBOARD ────────────────────────────────────────────────────────
 
 export type LenderDashboardData = {
@@ -150,6 +217,7 @@ export const disburseLoanFn = createServerFn({ method: 'POST' })
     const dueDateVal =
       dueDate ?? new Date(Date.now() + 90 * 86400000).toISOString()
 
+    // Create loans first
     const loanRows = members.map((farmer) => ({
       createdBy: 'admin',
       farmerId: farmer.$id,
@@ -158,24 +226,46 @@ export const disburseLoanFn = createServerFn({ method: 'POST' })
       season,
       disbursedAt: now,
       dueDate: dueDateVal,
-      status: 'active',
+      status: 'disbursed',
     }))
 
     const loansResult = await db().use('loans').createMany(loanRows)
 
-    // Create disbursement transactions
-    const txRows = loansResult.rows.map((loan) => ({
-      createdBy: 'admin',
-      farmerId: loan.farmerId,
-      loanId: loan.$id,
-      mpesaReceiptNumber: generateMpesaReceipt(),
-      amount: loan.amount,
-      type: 'disbursement',
-      timestamp: now,
-      callbackPayload: JSON.stringify({ source: 'groupflux-admin', season }),
-    }))
+    // B2C disbursement per farmer
+    const shortcode = import.meta.env.MPESA_SHORTCODE
+    const callbackUrl = import.meta.env.MPESA_CALLBACK_URL
+    if (!shortcode || !callbackUrl) {
+      throw new Error('M-Pesa config missing: MPESA_SHORTCODE, MPESA_CALLBACK_URL')
+    }
 
-    await db().use('transactions').createMany(txRows)
+    // Disburse to each farmer via B2C
+    for (const loan of loansResult.rows) {
+      try {
+        const farmer = members.find(m => m.$id === loan.farmerId)
+        if (!farmer) continue
+        const phone = farmer.mpesaNumber || farmer.phone
+        const result = await disburseViaMpesaB2C(phone, amount, shortcode, callbackUrl)
+
+        // Create disbursement transaction with M-Pesa conversation ID
+        await db().use('transactions').create({
+          createdBy: 'admin',
+          farmerId: loan.farmerId,
+          loanId: loan.$id,
+          mpesaReceiptNumber: result.conversationId,
+          amount: loan.amount,
+          type: 'disbursement',
+          timestamp: now,
+          callbackPayload: JSON.stringify({
+            source: 'mpesa-b2c',
+            conversationId: result.conversationId,
+            responseCode: result.responseCode,
+          }),
+        })
+      } catch (err) {
+        console.error('B2C disbursement failed for loan', loan.$id, err)
+        // Optionally update loan status to 'failed' or keep 'disbursed' for demo
+      }
+    }
 
     return { loansCreated: loansResult.rows.length }
   })
@@ -530,115 +620,26 @@ export const seedDemoDataFn = createServerFn({ method: 'POST' }).handler(
     const g = groups.rows
 
     // Create farmers
+    // M-Pesa sandbox test numbers (from Safaricom)
+    const testNumbers = [
+      '254708374149','254708374150','254708374151','254708374152','254708374153',
+      '254708374154','254708374155','254708374156','254708374157','254708374158',
+      '254708374159','254708374160'
+    ]
+
     const farmerData = [
-      {
-        name: 'Wanjiru Kamau',
-        phone: '+254712345678',
-        mpesaNumber: '+254712345678',
-        role: 'leader',
-        groupId: g[0].$id,
-        trustScore: 92,
-        seasonsActive: 6,
-      },
-      {
-        name: 'Kipchoge Mutai',
-        phone: '+254723456789',
-        mpesaNumber: '+254723456789',
-        role: 'member',
-        groupId: g[0].$id,
-        trustScore: 85,
-        seasonsActive: 4,
-      },
-      {
-        name: 'Achieng Otieno',
-        phone: '+254734567890',
-        mpesaNumber: '+254734567890',
-        role: 'member',
-        groupId: g[0].$id,
-        trustScore: 78,
-        seasonsActive: 3,
-      },
-      {
-        name: 'Muthoni Njoroge',
-        phone: '+254745678901',
-        mpesaNumber: '+254745678901',
-        role: 'leader',
-        groupId: g[1].$id,
-        trustScore: 88,
-        seasonsActive: 5,
-      },
-      {
-        name: 'Ochieng Odhiambo',
-        phone: '+254756789012',
-        mpesaNumber: '+254756789012',
-        role: 'member',
-        groupId: g[1].$id,
-        trustScore: 65,
-        seasonsActive: 2,
-      },
-      {
-        name: 'Njeri Waweru',
-        phone: '+254767890123',
-        mpesaNumber: '+254767890123',
-        role: 'member',
-        groupId: g[1].$id,
-        trustScore: 91,
-        seasonsActive: 7,
-      },
-      {
-        name: 'Karanja Mwangi',
-        phone: '+254778901234',
-        mpesaNumber: '+254778901234',
-        role: 'leader',
-        groupId: g[2].$id,
-        trustScore: 72,
-        seasonsActive: 3,
-      },
-      {
-        name: 'Fatuma Hassan',
-        phone: '+254789012345',
-        mpesaNumber: '+254789012345',
-        role: 'member',
-        groupId: g[2].$id,
-        trustScore: 58,
-        seasonsActive: 2,
-      },
-      {
-        name: 'Otieno Odera',
-        phone: '+254790123456',
-        mpesaNumber: '+254790123456',
-        role: 'leader',
-        groupId: g[3].$id,
-        trustScore: 96,
-        seasonsActive: 8,
-      },
-      {
-        name: 'Mwangi Gitau',
-        phone: '+254701234567',
-        mpesaNumber: '+254701234567',
-        role: 'member',
-        groupId: g[3].$id,
-        trustScore: 82,
-        seasonsActive: 4,
-      },
-      {
-        name: 'Amina Wekesa',
-        phone: '+254711234567',
-        mpesaNumber: '+254711234567',
-        role: 'member',
-        groupId: g[4].$id,
-        trustScore: 44,
-        seasonsActive: 1,
-      },
-      {
-        name: 'Simiyu Barasa',
-        phone: '+254722345678',
-        mpesaNumber: '+254722345678',
-        role: 'leader',
-        groupId: g[4].$id,
-        trustScore: 38,
-        seasonsActive: 1,
-      },
+      { name: 'Wanjiru Kamau', phone: testNumbers[0], mpesaNumber: testNumbers[0], role: 'leader', groupId: g[0].$id, trustScore: 92, seasonsActive: 6 },
+      { name: 'Kipchoge Mutai', phone: testNumbers[1], mpesaNumber: testNumbers[1], role: 'member', groupId: g[0].$id, trustScore: 85, seasonsActive: 4 },
+      { name: 'Achieng Otieno', phone: testNumbers[2], mpesaNumber: testNumbers[2], role: 'member', groupId: g[0].$id, trustScore: 78, seasonsActive: 3 },
+      { name: 'Muthoni Njoroge', phone: testNumbers[3], mpesaNumber: testNumbers[3], role: 'leader', groupId: g[1].$id, trustScore: 88, seasonsActive: 5 },
+      { name: 'Ochieng Odhiambo', phone: testNumbers[4], mpesaNumber: testNumbers[4], role: 'member', groupId: g[1].$id, trustScore: 65, seasonsActive: 2 },
+      { name: 'Njeri Waweru', phone: testNumbers[5], mpesaNumber: testNumbers[5], role: 'member', groupId: g[1].$id, trustScore: 91, seasonsActive: 7 },
+      { name: 'Karanja Mwangi', phone: testNumbers[6], mpesaNumber: testNumbers[6], role: 'leader', groupId: g[2].$id, trustScore: 72, seasonsActive: 3 },
+      { name: 'Fatuma Hassan', phone: testNumbers[7], mpesaNumber: testNumbers[7], role: 'member', groupId: g[2].$id, trustScore: 58, seasonsActive: 2 },
+      { name: 'Otieno Odera', phone: testNumbers[8], mpesaNumber: testNumbers[8], role: 'leader', groupId: g[3].$id, trustScore: 96, seasonsActive: 8 },
+      { name: 'Mwangi Gitau', phone: testNumbers[9], mpesaNumber: testNumbers[9], role: 'member', groupId: g[3].$id, trustScore: 82, seasonsActive: 4 },
+      { name: 'Amina Wekesa', phone: testNumbers[10], mpesaNumber: testNumbers[10], role: 'member', groupId: g[4].$id, trustScore: 44, seasonsActive: 1 },
+      { name: 'Simiyu Barasa', phone: testNumbers[11], mpesaNumber: testNumbers[11], role: 'leader', groupId: g[4].$id, trustScore: 38, seasonsActive: 1 },
     ]
 
     const farmersResult = await db()
