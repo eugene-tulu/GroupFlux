@@ -16,6 +16,7 @@ import {
   OGImageConfig,
   OGMetaTags,
 } from '@/lib/og-config'
+import { Analytics } from '@vercel/analytics/react'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -113,6 +114,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           {children}
           <Toaster />
         </ThemeProvider>
+        <Analytics />
         <Scripts />
       </body>
     </html>
