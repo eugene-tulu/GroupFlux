@@ -16,7 +16,7 @@ import {
   OGImageConfig,
   OGMetaTags,
 } from '@/lib/og-config'
-import { Analytics } from '@vercel/analytics/react'
+import { inject } from '@vercel/analytics'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -114,9 +114,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           {children}
           <Toaster />
         </ThemeProvider>
-        <Analytics />
         <Scripts />
       </body>
     </html>
   )
+}
+
+// Inject Vercel Analytics script
+if (typeof window !== 'undefined') {
+  inject()
 }
