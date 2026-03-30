@@ -2,7 +2,7 @@
 
 > Farmer-first group lending platform powered by M-Pesa and Appwrite.
 
-**Live demo:** [group-flux.vercel.app](https://group-flux.vercel.app)
+**Live demo:** [group-flux-three.vercel.app](https://group-flux-three.vercel.app/)
 
 GroupFlux bridges the gap between smallholder farmers and financial institutions. Farmers join lending groups, repay loans via M-Pesa, and earn verifiable trust scores — unlocking access to formal credit that was previously out of reach.
 
