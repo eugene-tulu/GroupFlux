@@ -1,25 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { z } from 'zod'
 import { databases } from '@/server/lib/db'
 import { calcTrustScore } from '@/server/functions/groupflux'
 
 const DB_ID = 'imagine-project-db'
-
-const callbackSchema = z.object({
-  TransactionType: z.string(),
-  TransID: z.string(),
-  TransTime: z.string(),
-  TransAmount: z.string(),
-  BusinessShortCode: z.string(),
-  BillRefNumber: z.string().optional(),
-  InvoiceNumber: z.string().optional(),
-  OrgAccountBalance: z.string().optional(),
-  ThirdPartyTransID: z.string().optional(),
-  MSISDN: z.string(),
-  FirstName: z.string().optional(),
-  MiddleName: z.string().optional(),
-  LastName: z.string().optional(),
-})
 
 function db() {
   return databases.use(DB_ID)
@@ -30,27 +13,55 @@ export const Route = createFileRoute('/_api/mpesa-callback')({
     handlers: {
       POST: async ({ request }) => {
         try {
-          const body = await request.text()
-          const payload = JSON.parse(body)
-
-          const result = callbackSchema.safeParse(payload)
-          if (!result.success) {
-            return new Response(JSON.stringify({ error: 'Invalid payload' }), { status: 400 })
+          const contentType = request.headers.get('content-type') || ''
+          let body: any
+          if (contentType.includes('application/json')) {
+            body = await request.json()
+          } else {
+            const formData = await request.formData()
+            body = Object.fromEntries(formData.entries())
           }
 
-          const { MSISDN: phone, TransID: mpesaTransactionId, TransAmount, BillRefNumber } = result.data
+          // Normalize keys
+          const normalized: any = {}
+          for (const [k, v] of Object.entries(body)) {
+            const lower = k.toLowerCase()
+            if (lower === 'transid') normalized.TransID = v
+            if (lower === 'transamount') normalized.TransAmount = v
+            if (lower === 'businessshortcode') normalized.BusinessShortCode = v
+            if (lower === 'billrefnumber') normalized.BillRefNumber = v
+            if (lower === 'msisdn' || lower === 'phone') normalized.MSISDN = v
+            if (lower === 'transtime') normalized.TransTime = v
+            if (lower === 'firstname') normalized.FirstName = v
+            if (lower === 'middlename') normalized.MiddleName = v
+            if (lower === 'lastname') normalized.LastName = v
+          }
 
-          // Find farmer by phone
+          if (!normalized.TransID || !normalized.TransAmount || !normalized.BusinessShortCode || !normalized.MSISDN) {
+            return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 })
+          }
+
+          const mpesaTransactionId = normalized.TransID
+          const amount = Number(normalized.TransAmount)
+          const phone = normalized.MSISDN
+          const shortcode = normalized.BusinessShortCode
+          const billRef = normalized.BillRefNumber
+
+          const expectedShortcode = import.meta.env.MPESA_SHORTCODE
+          if (expectedShortcode && shortcode !== expectedShortcode) {
+            return new Response(JSON.stringify({ error: 'Shortcode mismatch' }), { status: 400 })
+          }
+
+          // Find farmer
           const farmersRes = await db()
             .use('farmers')
             .list({ queries: (q) => [q.or(q.equal('phone', phone), q.equal('mpesaNumber', phone)), q.limit(1)] })
-          
-          if (!farmersRes.rows.length) {
-            return new Response(JSON.stringify({ status: 'ignored', reason: 'farner not found' }), { status: 200 })
+          if (farmersRes.rows.length === 0) {
+            return new Response(JSON.stringify({ status: 'ignored', reason: 'farmer not found' }), { status: 200 })
           }
           const farmer = farmersRes.rows[0]
 
-          // Find active/overdue loans for farmer
+          // Find active loan
           const loansRes = await db()
             .use('loans')
             .list({ queries: (q) => [
@@ -59,32 +70,29 @@ export const Route = createFileRoute('/_api/mpesa-callback')({
               q.limit(10)
             ] })
 
-          let loanToUpdate = null
-          if (BillRefNumber && loansRes.rows.length > 0) {
-            // Try to match by BillRefNumber (loan ID)
-            loanToUpdate = loansRes.rows.find((l: any) => l.$id === BillRefNumber)
+          let loanToUpdate: any = null
+          if (billRef) {
+            loanToUpdate = loansRes.rows.find((l: any) => l.$id === billRef)
           }
-          if (!loanToUpdate && loansRes.rows.length === 1) {
-            // If only one active loan, use it
-            loanToUpdate = loansRes.rows[0]
+          if (!loanToUpdate && loansRes.rows.length > 0) {
+            loanToUpdate = loansRes.rows.sort((a: any, b: any) =>
+              new Date(b.$createdAt).getTime() - new Date(a.$createdAt).getTime()
+            )[0]
           }
 
           if (!loanToUpdate) {
-            return new Response(JSON.stringify({ status: 'ignored', reason: 'no matching loan' }), { status: 200 })
+            return new Response(JSON.stringify({ status: 'ignored', reason: 'no matching active loan' }), { status: 200 })
           }
 
-          // Check if transaction already exists (idempotency)
-          const existingTx = await db()
+          // Idempotency
+          const existingTxRes = await db()
             .use('transactions')
             .list({ queries: (q) => [q.equal('mpesaReceiptNumber', mpesaTransactionId), q.limit(1)] })
-          if (existingTx.rows.length > 0) {
+          if (existingTxRes.rows.length > 0) {
             return new Response(JSON.stringify({ status: 'already processed' }), { status: 200 })
           }
 
-          const amount = parseFloat(TransAmount)
           const now = new Date().toISOString()
-
-          // Create transaction record
           await db().use('transactions').create({
             createdBy: 'mpesa-callback',
             farmerId: farmer.$id,
@@ -93,30 +101,37 @@ export const Route = createFileRoute('/_api/mpesa-callback')({
             amount,
             type: 'repayment',
             timestamp: now,
-            callbackPayload: JSON.stringify({ source: 'c2b-callback', phone, payload: result.data }),
+            callbackPayload: JSON.stringify({
+              source: 'c2b-callback',
+              phone,
+              shortcode,
+              billRef,
+              raw: normalized,
+            }),
           })
 
-          // Update loan status to repaid
           await db().use('loans').update(loanToUpdate.$id, { status: 'repaid' })
 
           // Recalculate trust score
-          const allLoans = await db()
+          const allLoansRes = await db()
             .use('loans')
             .list({ queries: (q) => [q.equal('farmerId', farmer.$id), q.limit(200)] })
-          const newScore = calcTrustScore(allLoans.rows)
-          const uniqueSeasons = new Set(allLoans.rows.map((l: any) => l.season).filter(Boolean)).size
+          const allLoans = allLoansRes.rows
+          const newScore = calcTrustScore(allLoans)
+          const uniqueSeasons = new Set(allLoans.map((l: any) => l.season).filter(Boolean)).size
           await db().use('farmers').update(farmer.$id, {
             trustScore: newScore,
             seasonsActive: uniqueSeasons,
           })
 
-          return new Response(JSON.stringify({ 
-            status: 'ok', 
-            loanId: loanToUpdate.$id, 
-            trustScore: newScore 
+          return new Response(JSON.stringify({
+            status: 'ok',
+            loanId: loanToUpdate.$id,
+            trustScore: newScore,
+            transactionId: mpesaTransactionId,
           }), { status: 200 })
-        } catch (error) {
-          console.error('M-Pesa callback error:', error)
+        } catch (err) {
+          console.error('C2B callback error:', err)
           return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 })
         }
       },

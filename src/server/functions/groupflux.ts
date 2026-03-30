@@ -107,6 +107,46 @@ export async function disburseViaMpesaB2C(
   }
 }
 
+// ─── M-Pesa Pull API (Reconciliation) ───────────────────────────────────────
+export async function pullMpesaTransactions(
+  phone: string,
+  daysBack: number = 180
+): Promise<any[]> {
+  const token = await getMpesaAccessToken()
+  const shortcode = import.meta.env.MPESA_SHORTCODE
+  if (!shortcode) throw new Error('MPESA_SHORTCODE not set')
+
+  const endDate = new Date()
+  const startDate = new Date()
+  startDate.setDate(endDate.getDate() - daysBack)
+
+  const format = (d: Date) => d.toISOString().replace('T', ' ').substring(0, 19)
+  const body = {
+    ShortCode: shortcode,
+    StartDate: format(startDate),
+    EndDate: format(endDate),
+    OffSetValue: '0',
+  }
+
+  const res = await fetch('https://sandbox.safaricom.co.ke/pulltransactions/v1/query', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  })
+
+  const data = await res.json()
+  // The response may wrap transactions in a field
+  const transactions = Array.isArray(data) ? data : (data.Transactions || [])
+  // Filter by phone number
+  return transactions.filter((tx: any) => {
+    const msisdn = tx.MSISDN || tx.Msisdn
+    return msisdn === phone
+  })
+}
+
 // ─── LENDER DASHBOARD ────────────────────────────────────────────────────────
 
 export type LenderDashboardData = {
@@ -492,6 +532,7 @@ export type VerificationResult = {
     totalLoans: number
     repaidLoans: number
     recommendation: 'approve' | 'review' | 'high-risk'
+    mpesaRepayments?: any[]
   }
 }
 
@@ -549,6 +590,14 @@ export const verifyFarmerFn = createServerFn({ method: 'GET' })
     const recommendation: 'approve' | 'review' | 'high-risk' =
       score >= 80 ? 'approve' : score >= 60 ? 'review' : 'high-risk'
 
+    // Pull M-Pesa repayment history
+    let mpesaRepayments: any[] = []
+    try {
+      mpesaRepayments = await pullMpesaTransactions(farmer.phone)
+    } catch (err) {
+      console.error('M-Pesa reconciliation failed:', err)
+    }
+
     return {
       found: true,
       farmer: {
@@ -563,6 +612,7 @@ export const verifyFarmerFn = createServerFn({ method: 'GET' })
         totalLoans: loans.length,
         repaidLoans: repaidCount,
         recommendation,
+        mpesaRepayments,
       },
     } as VerificationResult
   })

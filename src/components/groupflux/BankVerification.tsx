@@ -210,6 +210,37 @@ export function BankVerification() {
                     </div>
                   )
                 })()}
+
+                {/* M-Pesa Repayment History */}
+                {result.farmer!.mpesaRepayments && result.farmer!.mpesaRepayments.length > 0 && (
+                  <div className="mpesa-history" style={{ marginTop: 24 }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
+                      M-Pesa Repayment History
+                    </h3>
+                    <div className="table-wrap">
+                      <table className="gf-table">
+                        <thead>
+                          <tr>
+                            <th>Date</th>
+                            <th>Amount (KES)</th>
+                            <th>Transaction ID</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {result.farmer!.mpesaRepayments.map((tx: any, idx: number) => (
+                            <tr key={idx}>
+                              <td>{tx.TransTime || tx.TransactionDate || 'N/A'}</td>
+                              <td>{tx.TransAmount}</td>
+                              <td style={{ fontFamily: 'monospace', fontSize: 12 }}>{tx.TransID}</td>
+                              <td><span style={{ color: '#1D9E75' }}>Completed</span></td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </motion.div>
